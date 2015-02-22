@@ -16,7 +16,6 @@
 (defn handle-message [type chan event]
   (fn [event]
     (let [msg (.-message event)]
-      (println type msg)
       (put! chan {:msg-type type :message msg}))))
 
 (def on-msg   (partial handle-message :msg))
