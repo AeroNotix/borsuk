@@ -11,6 +11,7 @@
   :node-dependencies [[source-map-support "0.2.8"]]
 
   :plugins [[lein-cljsbuild "1.0.4"]
+            [lein-figwheel "0.2.5-SNAPSHOT"]
             [lein-npm "0.4.0"]]
 
   :source-paths ["src" "target/classes"]

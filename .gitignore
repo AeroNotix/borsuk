@@ -10,3 +10,4 @@ pom.xml
 /out-adv/
 /.repl/
 /resources/public/js/compiled/*
+/figwheel_server.log
