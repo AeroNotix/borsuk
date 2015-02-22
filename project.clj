@@ -1,10 +1,11 @@
 (defproject borsuk "0.0.1"
   :description "A ClojureScript Riemann dashboard"
-  :dependencies [[org.clojure/clojure "1.6.0"]
-                 [org.omcljs/om "0.8.8"]
-                 [prismatic/om-tools "0.3.10"]
+  :dependencies [[com.cemerick/url "0.1.1"]
+                 [org.clojure/clojure "1.6.0"]
+                 [org.clojure/clojurescript "0.0-2850"]
                  [org.clojure/core.async "0.1.256.0-1bf8cf-alpha"]
-                 [org.clojure/clojurescript "0.0-2850"]]
+                 [org.omcljs/om "0.8.8"]
+                 [prismatic/om-tools "0.3.10"]]
 
   :node-dependencies [[source-map-support "0.2.8"]]
 

@@ -1,6 +1,8 @@
 (ns borsuk.core
   (:require-macros [cljs.core.async.macros :refer [go go-loop]])
-  (:require [cljs.core.async :as async :refer [<! >! take! put! chan]]
+  (:require [borsuk.formatter :refer [format]]
+            [cemerick.url :refer [url url-encode]]
+            [cljs.core.async :as async :refer [<! >! take! put! chan]]
             [goog.net.WebSocket :as ws]
             [om.core :as om]
             [om-tools.dom :as dom])
@@ -9,8 +11,7 @@
 
 (enable-console-print!)
 
-(def riemann-addr
-  "ws://127.0.0.1:5556/index?subscribe=true&query=service%20%3D%20%22airos.uptime_counters%22")
+(def base-address "ws://%s:%d/index/")
 
 (defn handle-message [type chan event]
   (fn [event]
@@ -23,8 +24,12 @@
 (def on-close (partial handle-message :closed))
 (def on-err   (partial handle-message :error))
 
-(defn ->WebSocket [addr]
-  (let [msg-chan (chan)
+(defn ->RiemannConnection [{:keys [host port query]}]
+  (let [addr (-> (format base-address host port)
+               url
+               (assoc :query {:subscribe true :query query})
+               str)
+        msg-chan (chan)
         new-ws (WebSocket. nil nil)
         handlers [[ws/EventType.MESSAGE on-msg]
                   [ws/EventType.OPENED  on-open]
@@ -33,6 +38,11 @@
     (doseq [[event-type event-handler] handlers]
       (.addEventListener new-ws event-type (event-handler msg-chan)))
     (.open new-ws addr)
-    [new-ws msg-chan]))
+    {:conn new-ws :chan msg-chan}))
 
-(def connection (->WebSocket riemann-addr))
+(def connection
+  (->RiemannConnection {:host "127.0.0.1" :port 5556
+                        :query "true"}))
+
+(go-loop []
+  (println (<! (:chan connection))))
