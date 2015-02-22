@@ -42,7 +42,8 @@
         new-ws (WebSocket. nil nil)
         handlers (keys message-types)]
     (doseq [event-type handlers]
-      (.addEventListener new-ws event-type (handle-message event-type recv-chan)))
+      (.addEventListener new-ws event-type
+        (handle-message event-type recv-chan)))
     (.open new-ws addr)
     {:conn new-ws :recv recv-chan}))
 
