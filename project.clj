@@ -1,6 +1,7 @@
 (defproject borsuk "0.0.1"
   :description "A ClojureScript Riemann dashboard"
   :dependencies [[com.cemerick/url "0.1.1"]
+                 [figwheel "0.2.5-SNAPSHOT"]
                  [org.clojure/clojure "1.6.0"]
                  [org.clojure/clojurescript "0.0-2850"]
                  [org.clojure/core.async "0.1.256.0-1bf8cf-alpha"]
@@ -16,21 +17,16 @@
 
   :clean-targets ["out" "out-adv"]
 
-  :cljsbuild {
-              :builds [{:id "dev"
+  :cljsbuild {:builds [{:id "dev"
                         :source-paths ["src"]
-                        :compiler {
-                                   :main borsuk.core
-                                   :output-to "out/borsuk.js"
-                                   :output-dir "out"
+                        :compiler {:main borsuk.core
+                                   :output-to "resources/public/js/compiled/borsuk.js"
+                                   :output-dir "resources/public/js/compiled/out"
                                    :optimizations :none
                                    :cache-analysis true
-                                   :source-map true}}
-                       {:id "release"
-                        :source-paths ["src"]
-                        :compiler {
-                                   :main borsuk.core
-                                   :output-to "out-adv/borsuk.min.js"
-                                   :output-dir "out-adv"
-                                   :optimizations :advanced
-                                   :pretty-print false}}]})
+                                   :asset-path "js/compiled/out"
+                                   :source-map true}}]}
+
+  :figwheel {:http-server-root "public"
+             :css-dirs ["resources/public/css"]
+             :nrepl-port 7888})

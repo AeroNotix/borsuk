@@ -9,3 +9,4 @@ pom.xml
 .lein-plugins/
 /out-adv/
 /.repl/
+/resources/public/js/compiled/*
