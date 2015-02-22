@@ -11,6 +11,11 @@
 
 (enable-console-print!)
 
+(def app-state
+  (atom
+    {:feeds [{:title "all" :type :log :query "true" :host "127.0.0.1" :port 5556}]
+     :keymap {}}))
+
 (def base-address "ws://%s:%d/index/")
 
 (defn handle-message [type chan event]
@@ -39,9 +44,37 @@
     (.open new-ws addr)
     {:conn new-ws :recv recv-chan}))
 
-(def connection
-  (->RiemannConnection
-    {:host "127.0.0.1" :port 5556 :query "true"}))
+(defn riemann-graph [{:keys [title type query host port]} owner]
+  (reify
+    om/IInitState
+    (init-state [_]
+      {:close (chan)})
+    om/IWillMount
+    (will-mount [_]
+      (let [conn (->RiemannConnection
+                   {:host host :port 5556 :query "true"})]
+        (go-loop []
+          (println (<! (:recv conn)))
+          (recur))))
+    om/IRenderState
+    (render-state [this {:keys [conn]}]
+      (take! (:recv conn) println))))
 
-(go-loop []
-  (println (<! (:chan connection))))
+(defn riemann-workspace [data owner]
+  (reify
+    om/IInitState
+    (init-state [_]
+      {:remove-graph (chan)
+       :new-graph (chan)})
+    om/IRenderState
+    (render-state [this state]
+      (dom/h2 "RIEMANN")
+      (apply dom/ul nil
+        (om/build-all riemann-graph (:feeds data)
+          {:init-state state})))))
+
+(defn main []
+  (om/root riemann-workspace app-state
+    {:target (. js/document (getElementById "app"))}))
+
+(main)
