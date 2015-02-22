@@ -64,8 +64,12 @@
                              (cons new-event events)))))
           (recur))))
     om/IRenderState
-    (render-state [this {:keys [conn]}]
-      (take! (:recv conn) println))))
+    (render-state [this _]
+      (dom/div nil
+        (dom/h2 nil title)
+        (apply dom/ul nil
+          (mapv (comp str :message)
+            (get-in @cursor [:events title])))))))
 
 (defn riemann-workspace [data owner]
   (reify
@@ -75,10 +79,11 @@
        :new-graph (chan)})
     om/IRenderState
     (render-state [this state]
-      (dom/h2 "RIEMANN")
-      (apply dom/ul nil
-        (om/build-all riemann-graph (:feeds data)
-          {:init-state state})))))
+      (dom/div nil
+        (dom/h2 nil "RIEMANN")
+        (apply dom/ul nil
+          (om/build-all riemann-graph (:feeds data)
+            {:init-state state}))))))
 
 (defn main []
   (om/root riemann-workspace app-state
