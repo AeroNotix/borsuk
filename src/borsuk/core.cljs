@@ -29,20 +29,20 @@
                url
                (assoc :query {:subscribe true :query query})
                str)
-        msg-chan (chan)
+        recv-chan (chan)
         new-ws (WebSocket. nil nil)
         handlers [[ws/EventType.MESSAGE on-msg]
                   [ws/EventType.OPENED  on-open]
                   [ws/EventType.CLOSED  on-close]
                   [ws/EventType.ERROR   on-err]]]
     (doseq [[event-type event-handler] handlers]
-      (.addEventListener new-ws event-type (event-handler msg-chan)))
+      (.addEventListener new-ws event-type (event-handler recv-chan)))
     (.open new-ws addr)
-    {:conn new-ws :chan msg-chan}))
+    {:conn new-ws :recv recv-chan}))
 
 (def connection
-  (->RiemannConnection {:host "127.0.0.1" :port 5556
-                        :query "true"}))
+  (->RiemannConnection
+    {:host "127.0.0.1" :port 5556 :query "true"}))
 
 (go-loop []
   (println (<! (:chan connection))))
