@@ -47,7 +47,7 @@
     (.open new-ws addr)
     {:conn new-ws :recv recv-chan}))
 
-(defn riemann-graph [{:keys [title type query host port]} owner]
+(defn riemann-graph [{:keys [title max type query host port] :as cursor} owner]
   (reify
     om/IInitState
     (init-state [_]
@@ -57,7 +57,11 @@
       (let [conn (->RiemannConnection
                    {:host host :port 5556 :query query})]
         (go-loop []
-          (println (<! (:recv conn)))
+          (let [new-event (<! (:recv conn))]
+            (om/transact! cursor [:events title]
+              (fn [events] (if (> (count events) max)
+                             (cons new-event (butlast events))
+                             (cons new-event events)))))
           (recur))))
     om/IRenderState
     (render-state [this {:keys [conn]}]
