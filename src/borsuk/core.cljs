@@ -28,7 +28,8 @@
 (def on-close (partial handle-message :closed))
 (def on-err   (partial handle-message :error))
 
-(defn ->RiemannConnection [{:keys [host port query]}]
+(defn ->RiemannConnection
+  [{:keys [host port query] :or {host "127.0.0.1" port 5556 query true}}]
   (let [addr (-> (format base-address host port)
                url
                (assoc :query {:subscribe true :query query})
