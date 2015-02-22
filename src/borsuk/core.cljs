@@ -55,7 +55,7 @@
     om/IWillMount
     (will-mount [_]
       (let [conn (->RiemannConnection
-                   {:host host :port 5556 :query "true"})]
+                   {:host host :port 5556 :query query})]
         (go-loop []
           (println (<! (:recv conn)))
           (recur))))
