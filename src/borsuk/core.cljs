@@ -18,15 +18,17 @@
 
 (def base-address "ws://%s:%d/index/")
 
-(defn handle-message [type chan event]
-  (fn [event]
-    (let [msg (.-message event)]
-      (put! chan {:msg-type type :message msg}))))
+(def message-types
+  {ws/EventType.MESSAGE :msg
+   ws/EventType.OPENED  :open
+   ws/EventType.CLOSED  :closed
+   ws/EventType.ERROR   :error})
 
-(def on-msg   (partial handle-message :msg))
-(def on-open  (partial handle-message :open))
-(def on-close (partial handle-message :closed))
-(def on-err   (partial handle-message :error))
+(defn handle-message [msg-type chan]
+  (let [msg-type (get message-types msg-type)]
+    (fn [event]
+      (let [msg (.-message event)]
+        (put! chan {:type msg-type :message msg})))))
 
 (defn ->RiemannConnection
   [{:keys [host port query] :or {host "127.0.0.1" port 5556 query true}}]
@@ -36,12 +38,9 @@
                str)
         recv-chan (chan)
         new-ws (WebSocket. nil nil)
-        handlers [[ws/EventType.MESSAGE on-msg]
-                  [ws/EventType.OPENED  on-open]
-                  [ws/EventType.CLOSED  on-close]
-                  [ws/EventType.ERROR   on-err]]]
-    (doseq [[event-type event-handler] handlers]
-      (.addEventListener new-ws event-type (event-handler recv-chan)))
+        handlers (keys message-types)]
+    (doseq [event-type handlers]
+      (.addEventListener new-ws event-type (handle-message event-type recv-chan)))
     (.open new-ws addr)
     {:conn new-ws :recv recv-chan}))
 
