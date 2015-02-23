@@ -19,13 +19,14 @@
   :clean-targets ["out" "out-adv"]
 
   :cljsbuild {:builds [{:id "dev"
-                        :source-paths ["src"]
-                        :compiler {:main borsuk.core
+                        :source-paths ["src" "dev_src"]
+                        :compiler {:main borsuk.dev
                                    :output-to "resources/public/js/compiled/borsuk.js"
                                    :output-dir "resources/public/js/compiled/out"
                                    :optimizations :none
                                    :cache-analysis true
                                    :asset-path "js/compiled/out"
+                                   :source-map-timestamp true
                                    :source-map true}}]}
 
   :figwheel {:http-server-root "public"
