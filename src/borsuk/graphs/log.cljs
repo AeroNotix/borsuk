@@ -9,9 +9,6 @@
 
 (defn ->Log [{:keys [title max type query host port] :as cursor} owner]
   (reify
-    om/IInitState
-    (init-state [_]
-      {:close (chan)})
     om/IWillMount
     (will-mount [_]
       (let [conn (->RiemannConnection
