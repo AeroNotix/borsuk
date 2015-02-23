@@ -1,12 +1,9 @@
 (ns borsuk.core
   (:require-macros [cljs.core.async.macros :refer [go go-loop]])
-  (:require [borsuk.formatter :refer [format]]
-            [cemerick.url :refer [url url-encode]]
-            [cljs.core.async :as async :refer [<! >! take! put! chan]]
-            [goog.net.WebSocket :as ws]
+  (:require [cljs.core.async :as async :refer [<! >! take! put! chan]]
+            [borsuk.connection :refer [->RiemannConnection]]
             [om.core :as om]
-            [om-tools.dom :as dom])
-  (:import [goog.net WebSocket]))
+            [om-tools.dom :as dom]))
 
 
 (enable-console-print!)
@@ -18,35 +15,6 @@
               :host "127.0.0.1" :port 5556}]
      :events {}
      :keymap {}}))
-
-(def base-address "ws://%s:%d/index/")
-
-(def message-types
-  {ws/EventType.MESSAGE :msg
-   ws/EventType.OPENED  :open
-   ws/EventType.CLOSED  :closed
-   ws/EventType.ERROR   :error})
-
-(defn handle-message [msg-type chan]
-  (let [msg-type (get message-types msg-type)]
-    (fn [event]
-      (let [msg (.-message event)]
-        (put! chan {:type msg-type :message msg})))))
-
-(defn ->RiemannConnection
-  [{:keys [host port query] :or {host "127.0.0.1" port 5556 query true}}]
-  (let [addr (-> (format base-address host port)
-               url
-               (assoc :query {:subscribe true :query query})
-               str)
-        recv-chan (chan)
-        new-ws (WebSocket. nil nil)
-        handlers (keys message-types)]
-    (doseq [event-type handlers]
-      (.addEventListener new-ws event-type
-        (handle-message event-type recv-chan)))
-    (.open new-ws addr)
-    {:conn new-ws :recv recv-chan}))
 
 (defn parse-event [event]
   (when event
@@ -77,7 +45,7 @@
     (render-state [this _]
       (dom/div nil
         (dom/h2 nil title)
-        (dom/table nil
+        (dom/table {:class "log"}
           (mapv #(-> % :message parse-event row-event)
             (get-in @cursor [:events title])))))))
 
