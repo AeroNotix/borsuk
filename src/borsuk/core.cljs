@@ -47,6 +47,15 @@
     (.open new-ws addr)
     {:conn new-ws :recv recv-chan}))
 
+(defn parse-event [event]
+  (when event
+    (let [{:strs [host service state metric]} (js->clj (js/JSON.parse event))]
+      [host service state metric])))
+
+(defn row-event [row]
+  (dom/tr nil
+    (mapv #(dom/td nil %) row)))
+
 (defn riemann-graph [{:keys [title max type query host port] :as cursor} owner]
   (reify
     om/IInitState
@@ -67,8 +76,8 @@
     (render-state [this _]
       (dom/div nil
         (dom/h2 nil title)
-        (apply dom/ul nil
-          (mapv (comp str :message)
+        (dom/table nil
+          (mapv #(-> % :message parse-event row-event)
             (get-in @cursor [:events title])))))))
 
 (defn riemann-workspace [data owner]
