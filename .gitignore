@@ -11,3 +11,4 @@ pom.xml
 /.repl/
 /resources/public/js/compiled/*
 /figwheel_server.log
+/repl/
