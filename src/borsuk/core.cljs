@@ -13,7 +13,6 @@
     {:feeds [{:title "all" :max 10 :graph-type :log :query "true" :host "127.0.0.1" :port 5556}
              {:title "second" :max 10 :graph-type :log :query "service = \"riemann streams rate\""
               :host "127.0.0.1" :port 5556}]
-     :events {}
      :keymap {}}))
 
 (defn graph-dispatcher [{:keys [graph-type] :as opts} state]
