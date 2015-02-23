@@ -2,6 +2,7 @@
   (:require [cljs.core.async :as async :refer [<! >! take! put! chan]]
             [borsuk.connection :refer [->RiemannConnection]]
             [borsuk.graphs.log :refer [->Log]]
+            [borsuk.graphs.gauge :refer [->Gauge]]
             [om.core :as om]
             [om-tools.dom :as dom]))
 
@@ -11,12 +12,15 @@
 (def app-state
   (atom
     {:feeds [{:title "all" :max 10 :graph-type :log :query "true" :host "127.0.0.1" :port 5556}
-             {:title "second" :max 10 :graph-type :log :query "service = \"riemann streams rate\""
+             {:title "second" :max 10 :graph-type :gauge :query "service = \"riemann streams rate\""
               :host "127.0.0.1" :port 5556}]
      :keymap {}}))
 
+(def graph-dispatch
+  {:log ->Log :gauge ->Gauge})
+
 (defn graph-dispatcher [{:keys [graph-type] :as opts} state]
-  ((graph-type {:log ->Log}) opts state))
+  ((graph-type graph-dispatch) opts state))
 
 (defn riemann-workspace [data owner]
   (reify
